@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  role          String    @default("admin")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  products    Product[]
+}
+
+model Product {
+  id                    String    @id @default(cuid())
+  title                 String
+  slug                  String    @unique
+  shortDescription      String?
+  fullDescription       String?
+  price                 Float
+  salePrice             Float?
+  isActive              Boolean   @default(true)
+  isFeatured            Boolean   @default(false)
+  isNewArrival          Boolean   @default(false)
+  isBestSeller          Boolean   @default(false)
+  madeToOrder           Boolean   @default(true)
+  personalisationEnabled Boolean  @default(true)
+  personalisationInstructions String?
+  recipientNameLimit    Int       @default(30)
+  messageLimit          Int       @default(200)
+  insideMessageLimit    Int       @default(100)
+  senderNameLimit       Int       @default(30)
+  examplePreviewText    String?
+  seoTitle              String?
+  seoDescription        String?
+  sortOrder             Int       @default(0)
+  categoryId            String
+  category              Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  images                ProductImage[]
+  orderItems            OrderItem[]
+  tags                  String?   @default("[]")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  isMain    Boolean  @default(false)
+  sortOrder Int      @default(0)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model SeasonalCampaign {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  isActive      Boolean   @default(false)
+  isFeatured    Boolean   @default(false)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  categoryIds   String?   @default("[]")
+  homepageOrder Int       @default(0)
+  bannerTitle   String?
+  bannerSubtitle String?
+  bannerCta     String?
+  bannerImage   String?
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int?
+  alt       String?
+  createdAt DateTime @default(now())
+}
+
+model Promotion {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  code          String?   @unique
+  discountType  String
+  discountValue Float
+  startsAt      DateTime?
+  endsAt        DateTime?
+  isActive      Boolean   @default(true)
+  bannerTitle   String?
+  bannerSubtitle String?
+  bannerCta     String?
+  bannerLink    String?
+  bannerImage   String?
+  location      String?   // announcement | homepage | campaign
+}
+
+model SiteSettings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+model EditableContentBlock {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  content   String
+  updatedAt DateTime @updatedAt
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  sortOrder Int      @default(0)
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  status          String      @default("pending")
+  email           String
+  firstName       String
+  lastName        String
+  addressLine1    String
+  addressLine2    String?
+  city            String
+  county          String?
+  postcode        String
+  country         String      @default("UK")
+  phone           String?
+  notes           String?
+  subtotal        Float
+  shipping        Float
+  discount        Float       @default(0)
+  total           Float
+  promoCode       String?
+  personalisation String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  quantity        Int      @default(1)
+  price           Float
+  personalisation String?
+}
+
+model NavigationItem {
+  id        String   @id @default(cuid())
+  label     String
+  href      String
+  sortOrder Int      @default(0)
+  location  String   // header | footer
+}

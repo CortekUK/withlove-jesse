@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 98%;
+    --foreground: 30 10% 15%;
+    --card: 40 30% 99%;
+    --card-foreground: 30 10% 15%;
+    --primary: 30 25% 35%;
+    --primary-foreground: 40 20% 98%;
+    --secondary: 35 20% 90%;
+    --secondary-foreground: 30 15% 25%;
+    --muted: 35 15% 94%;
+    --muted-foreground: 30 10% 45%;
+    --accent: 35 25% 88%;
+    --accent-foreground: 30 15% 25%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 35 20% 88%;
+    --input: 35 20% 88%;
+    --ring: 30 25% 35%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-sand-200;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-premium-bg text-premium-black antialiased;
+  }
+}
+
+/* Premium typography hierarchy */
+.prose-premium h1 { @apply font-serif text-4xl md:text-5xl lg:text-6xl font-medium text-premium-brown leading-tight tracking-tight; }
+.prose-premium h2 { @apply font-serif text-2xl md:text-3xl font-medium text-premium-brown; }
+.prose-premium p { @apply text-premium-taupe leading-relaxed; }
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Smooth transitions for page content */
+.page-content {
+  animation: fadeIn 0.5s ease-out;
+}

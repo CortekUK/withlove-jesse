@@ -1,0 +1,120 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Upload, X, FileImage } from "lucide-react";
+
+const ACCEPT = "image/png,image/jpeg,image/jpg,application/pdf";
+
+export function MediaUpload({
+  value,
+  onChange,
+  label = "Upload image",
+  accept = ACCEPT,
+}: {
+  value?: string;
+  onChange: (url: string) => void;
+  label?: string;
+  accept?: string;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setError(null);
+    setLoading(true);
+
+    const fd = new FormData();
+    fd.set("file", file);
+
+    try {
+      const res = await fetch("/api/admin/media/upload", {
+        method: "POST",
+        body: fd,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Upload failed");
+        return;
+      }
+
+      onChange(data.url);
+    } catch {
+      setError("Upload failed");
+    } finally {
+      setLoading(false);
+      e.target.value = "";
+    }
+  }
+
+  const isImage = value?.match(/\.(png|jpg|jpeg|webp|gif)$/i) || value?.startsWith("/uploads/");
+
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      {value ? (
+        <div className="relative rounded-lg border border-sand-200 p-4 bg-premium-bg">
+          {isImage ? (
+            <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-premium-soft">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={value}
+                alt="Upload preview"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-premium-taupe">
+              <FileImage className="h-8 w-8" />
+              <span className="text-sm truncate">{value}</span>
+            </div>
+          )}
+          <div className="mt-2 flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => inputRef.current?.click()}
+              disabled={loading}
+            >
+              {loading ? "Uploading..." : "Replace"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onChange("")}
+              className="text-red-600"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div
+          onClick={() => inputRef.current?.click()}
+          className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-sand-200 p-8 cursor-pointer hover:border-premium-accent hover:bg-premium-bg/50 transition-colors"
+        >
+          <Upload className="h-10 w-10 text-premium-taupe mb-2" />
+          <p className="text-sm text-premium-taupe">
+            {loading ? "Uploading..." : "Click to upload PNG, JPG, or PDF"}
+          </p>
+        </div>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        onChange={handleFile}
+        className="hidden"
+      />
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
